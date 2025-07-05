@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: fusionpbx_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: fusionpbx
+      POSTGRES_USER: fusionpbxuser
+      POSTGRES_PASSWORD: fusionpbxpass
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  fusionpbx:
+    build: .
+    container_name: fusionpbx
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=fusionpbx
+      - DB_USER=fusionpbxuser
+      - DB_PASS=fusionpbxpass
+    ports:
+      - "80:80"
+      - "5060:5060/tcp"
+      - "5060:5060/udp"
+      - "16384-16393:16384-16393/udp"
+    volumes:
+      - fusionpbx_data:/var/www/fusionpbx
+      - freeswitch_data:/etc/freeswitch
+
+volumes:
+  db_data:
+  fusionpbx_data:
+  freeswitch_data:
